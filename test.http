@@ -1,0 +1,12 @@
+###
+POST http://localhost:3000/v1/projects/f7b3c9e4-7404-4a1d-a6e6-6d08e39e47e6/tasks HTTP/1.1
+content-type: application/json
+
+{
+    "title": "Fazer café",
+    "description": ""
+}
+
+
+###
+DELETE http://localhost:3000/v1/projects/f7b3c9e4-7404-4a1d-a6e6-6d08e39e47e6/tasks/b33ba551-5a4e-4e22-9ad8-7a0f24b23132 HTTP/1.1
