@@ -1,15 +1,18 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post, Put, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post, Put, UseGuards, UseInterceptors } from '@nestjs/common';
 import { CollaboratorsService } from './collaborators.service';
 import { ValidateResourcesIds } from 'src/common/decorators/validate-resources-ids.decorator';
 import { ValidateResourcesIdsInterceptor } from 'src/common/interceptors/validate-resources-ids.interceptor';
-import { ApiCreatedResponse, ApiNoContentResponse, ApiResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiCreatedResponse, ApiNoContentResponse, ApiResponse } from '@nestjs/swagger';
 import { AddCollaboratorDTO, CollaboratorListItemDTO, UpdateCollaboratorDTO } from './colaborators.dto';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth/jwt-auth.guard';
 
 @Controller({
   version: '1',
   path: 'projects/:projectId/collaborators'
 })
 @UseInterceptors(ValidateResourcesIdsInterceptor)
+@UseGuards(JwtAuthGuard)
+@ApiBearerAuth('jwt')
 export class CollaboratorsController {
   constructor(private readonly collaboratorsService: CollaboratorsService) {}
 

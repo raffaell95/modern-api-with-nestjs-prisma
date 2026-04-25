@@ -1,0 +1,3 @@
+GET http://localhost:3000/v1/auth/protected
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzNTRlZmUzZC1hZGExLTRlZjAtYjZiNi1kNjcwY2ZmZGU4MzYiLCJpYXQiOjE3NzY5NjM4MDYsImV4cCI6MTc3NzA1MDIwNn0.ugALdIXlZwjIOCnhyWrupyZoYeUppMmb-rlQ1iyjDOM
+Content-Type: application/json
