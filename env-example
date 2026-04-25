@@ -1,0 +1,11 @@
+DATABASE_URL=postgresql://example.com
+SECRET_KEY=you_secret_key
+
+#MAIL SETTINGS
+SMTP_HOST=smtp.example.com
+SMTP_PORT=0000
+SMTP_USER=your_user
+SMTP_PASS=your_password
+
+#RABBITMQ SETTINGS
+RABBITMQ_URL=amqp.example.com
