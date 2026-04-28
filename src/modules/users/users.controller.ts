@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, NotFoundException, Param, ParseUUIDPipe, Post, Put, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, NotFoundException, Param, ParseUUIDPipe, Post, Put, Query, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDTO, UpdateUserDTO, UserFullDTO, UserListItemDTO } from './users.dto';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiResponse } from '@nestjs/swagger';
@@ -7,6 +7,8 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { CloudinaryService } from 'src/common/services/cloudinary/cloudinary.service';
 import { RequestContextService } from 'src/common/services/request-context/request-context.service';
 import multer from "multer";
+import { QueryPaginationDto } from 'src/common/dtos/query-pagination.dto';
+import { ApiPaginatedResponse } from 'src/common/swagger/api-paginated-response';
 
 @Controller({
   version: '1',
@@ -22,9 +24,9 @@ export class UsersController {
   ) {}
 
   @Get()
-  @ApiResponse({ type: UserListItemDTO})
-  findAll() {
-    return this.userService.findAll()
+  @ApiPaginatedResponse(UserListItemDTO)
+  findAll(@Query() query: QueryPaginationDto) {
+    return this.userService.findAll(query)
   }
 
   @Get(':id')

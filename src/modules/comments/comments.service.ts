@@ -1,7 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
-import { CommentRequestDTO } from './comments.dto';
+import { CommentListItemDTO, CommentRequestDTO } from './comments.dto';
 import { RequestContextService } from 'src/common/services/request-context/request-context.service';
+import { QueryPaginationDto } from 'src/common/dtos/query-pagination.dto';
+import { paginate, paginateOutput } from 'src/utils/pagination.utils';
 
 @Injectable()
 export class CommentsService {
@@ -10,8 +12,9 @@ export class CommentsService {
     private readonly requestContext: RequestContextService
   ) {}
 
-  findAllByTask(taskId: string) {
-    return this.prisma.comment.findMany({
+  async findAllByTask(taskId: string, query?: QueryPaginationDto) {
+    const comments = await this.prisma.comment.findMany({
+      ...paginate(query),
       where: { taskId },
       include: {
         author: {
@@ -24,6 +27,10 @@ export class CommentsService {
         },
       },
     })
+
+    const total = await this.prisma.comment.count({ where: { taskId } })
+
+    return paginateOutput<CommentListItemDTO>(comments, total, query)
   }
 
   findById(taskId: string, commentId: string) {

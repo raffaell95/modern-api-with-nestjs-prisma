@@ -2,9 +2,10 @@ import { Module } from '@nestjs/common';
 import { CollaboratorsController } from './collaborators.controller';
 import { CollaboratorsService } from './collaborators.service';
 import { PrismaService } from 'src/prisma.service';
+import { RequestContextService } from 'src/common/services/request-context/request-context.service';
 
 @Module({
   controllers: [CollaboratorsController],
-  providers: [CollaboratorsService, PrismaService]
+  providers: [CollaboratorsService, PrismaService, RequestContextService]
 })
 export class CollaboratorsModule {}

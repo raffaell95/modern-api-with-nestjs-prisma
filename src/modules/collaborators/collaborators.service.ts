@@ -1,14 +1,17 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
 import { PrismaService } from 'src/prisma.service'
-import { AddCollaboratorDTO, UpdateCollaboratorDTO } from './colaborators.dto'
+import { AddCollaboratorDTO, CollaboratorListItemDTO, UpdateCollaboratorDTO } from './colaborators.dto'
 import { CollaboratorRole } from '@prisma/client'
+import { QueryPaginationDto } from 'src/common/dtos/query-pagination.dto'
+import { paginate, paginateOutput } from 'src/utils/pagination.utils'
 
 @Injectable()
 export class CollaboratorsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  findAllByProject(projectId: string) {
-    return this.prisma.projectCollaborator.findMany({
+  async findAllByProject(projectId: string, query?: QueryPaginationDto) {
+    const collaborators = await this.prisma.projectCollaborator.findMany({
+      ...paginate(query),
       where: { projectId },
       include: {
         user: {
@@ -21,6 +24,10 @@ export class CollaboratorsService {
         },
       },
     })
+
+    const total = await this.prisma.projectCollaborator.count({ where: { projectId } })
+
+    return  paginateOutput<CollaboratorListItemDTO>(collaborators, total, query)
   }
 
   async create(projectId: string, data: AddCollaboratorDTO) {
