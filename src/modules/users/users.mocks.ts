@@ -3,8 +3,8 @@ import { User } from '@prisma/client'
 import { QueryPaginationDto } from 'src/common/dtos/query-pagination.dto'
 
 export const mockPaginationQuery: QueryPaginationDto = {
-    page: '1',
-    size: '10',
+    page: 1,
+    size: 10,
 }
 
 export const mockedUsers = faker.helpers.multiple<User>(() => ({

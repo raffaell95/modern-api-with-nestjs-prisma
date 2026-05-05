@@ -31,7 +31,7 @@ export class AuthController {
 
   @Post('forgot-password')
   forgotPassword(@Body() data: ForgotPasswordDTO) {
-    return this.authService.forgotPassword(data)
+    return this.authService.forgotPassword(data.email)
   }
 
   @Post('reset-password')
