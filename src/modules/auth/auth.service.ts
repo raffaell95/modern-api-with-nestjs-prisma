@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, NotFoundException, UnauthorizedExcepti
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/prisma.service';
-import { SignInDTO, SignUpDTO } from './auth.dto';
+import { ChangePasswordDTO, SignInDTO, SignUpDTO } from './auth.dto';
 import * as bcrypt from 'bcrypt';
 import { MailService } from '../mail/mail.service';
 
@@ -12,7 +12,7 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
     private readonly prisma: PrismaService,
-    private readonly mailService: MailService
+    private readonly mailSerivice: MailService,
   ) { }
 
   async signup(data: SignUpDTO) {
@@ -23,7 +23,11 @@ export class AuthService {
       password: hash,
     })
 
-    return this.jwtService.sign({ sub: newUser.id })
+    return {
+      token: this.jwtService.sign({
+        sub: newUser.id,
+      }),
+    }
   }
 
   async signin(data: SignInDTO) {
@@ -40,8 +44,8 @@ export class AuthService {
     throw new UnauthorizedException()
   }
 
-  async forgotPassword(data: { email: string }) {
-    const user = await this.usersService.findByEmail(data.email)
+  async forgotPassword(email: string) {
+    const user = await this.usersService.findByEmail(email)
 
     if (!user) {
       throw new NotFoundException('User not found')
@@ -50,13 +54,13 @@ export class AuthService {
     const token = this.jwtService.sign({
       sub: user.id,
       email: user.email,
-      purpose: 'password_reset'
+      purpose: 'password_reset',
     })
 
-    await this.mailService.sendPasswordReset(user.email, token)
+    await this.mailSerivice.sendPasswordRequest(user.email, token)
 
     return {
-      message: 'Password request email sent'
+      message: 'Password request email sent',
     }
   }
 
@@ -65,13 +69,13 @@ export class AuthService {
       const payload = this.jwtService.verify(token)
 
       if (payload.purpose !== 'password_reset') {
-        throw new BadRequestException('Invalid token purpose')
+        throw new BadRequestException('Invalid token')
       }
 
       const user = await this.usersService.findById(payload.sub)
 
       if (!user) {
-        throw new BadRequestException('User not found')
+        throw new BadRequestException('Invalid token')
       }
 
       const hash = await bcrypt.hash(newPassword, 12)
@@ -80,10 +84,32 @@ export class AuthService {
         where: { id: user.id },
         data: { password: hash },
       })
-
-    }catch (error) {
+    } catch (error) {
       console.log(error)
       throw new BadRequestException('Invalid or expired token')
     }
+  }
+
+  async changePassword(userId: string, data: ChangePasswordDTO) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    })
+
+    if (!user) {
+      throw new NotFoundException('User not found')
+    }
+
+    const valid = await bcrypt.compare(data.currentPassword, user.password)
+
+    if (!valid) {
+      throw new UnauthorizedException('Current password is not valid')
+    }
+
+    const hash = await bcrypt.hash(data.newPassword, 12)
+
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: { password: hash },
+    })
   }
 }

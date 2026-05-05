@@ -1,10 +1,12 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, UseGuards } from '@nestjs/common';
-import { ForgotPasswordDTO, ResetPasswordDTO, SignInDTO, SignUpDTO } from './auth.dto';
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, Put, UseGuards } from '@nestjs/common';
+import { ChangePasswordDTO, ForgotPasswordDTO, ResetPasswordDTO, SignInDTO, SignUpDTO } from './auth.dto';
 import { AuthService } from './auth.service';
 import { UsersService } from '../users/users.service';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthenticatedUser } from 'src/common/decorators/authenticated-user.decorator';
 import type { User } from '@prisma/client';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth/jwt-auth.guard';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 @Controller({
   version: '1',
@@ -14,7 +16,7 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly usersService: UsersService,
-  ) {}
+  ) { }
 
   @Post('signup')
   signup(@Body() data: SignUpDTO) {
@@ -35,6 +37,14 @@ export class AuthController {
   @Post('reset-password')
   resetPassword(@Body() data: ResetPasswordDTO) {
     return this.authService.resetPassword(data.token, data.newPassword)
+  }
+
+  @Put('change-password')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('jwt')
+  async changePassword(@AuthenticatedUser() user: User, @Body() data: ChangePasswordDTO) {
+    await this.authService.changePassword(user.id, data)
+    return { message: 'Password changed successfully' }
   }
 
 }
