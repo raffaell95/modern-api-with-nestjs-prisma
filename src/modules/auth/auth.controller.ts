@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, Put, UnauthorizedException, UseGuards } from '@nestjs/common';
 import { ChangePasswordDTO, ForgotPasswordDTO, ResetPasswordDTO, SignInDTO, SignUpDTO } from './auth.dto';
 import { AuthService } from './auth.service';
 import { UsersService } from '../users/users.service';
@@ -27,6 +27,25 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   signin(@Body() data: SignInDTO) {
     return this.authService.signin(data)
+  }
+
+  @Get('me')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('jwt')
+  async me(@AuthenticatedUser() user: User) {
+    const userData = await this.usersService.findById(user.id)
+    if (!userData) {
+      throw new UnauthorizedException('User not found')
+    }
+
+    return {
+      id: userData.id,
+      name: userData.name,
+      avatar: userData.avatar,
+      email: userData.email,
+      createdAt: userData.createdAt,
+      updatedAt: userData.updatedAt
+    }
   }
 
   @Post('forgot-password')

@@ -8,6 +8,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './jwt.strategy';
 import { MailService } from '../mail/mail.service';
 import { MailModule } from '../mail/mail.module';
+import { RequestContextService } from 'src/common/services/request-context/request-context.service';
 
 @Module({
   imports: [
@@ -19,6 +20,6 @@ import { MailModule } from '../mail/mail.module';
     MailModule
   ],
   controllers: [AuthController],
-  providers: [AuthService, PrismaService, UsersService, JwtStrategy, MailService],
+  providers: [AuthService, PrismaService, UsersService, JwtStrategy, MailService, RequestContextService],
 })
-export class AuthModule {}
+export class AuthModule { }
